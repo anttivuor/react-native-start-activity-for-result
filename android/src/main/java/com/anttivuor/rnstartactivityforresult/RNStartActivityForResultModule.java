@@ -1,15 +1,16 @@
-package com.burnweb.rnsendintent;
+package com.anttivuor.startactivityforresult;
 
 import android.app.Activity;
-// import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
-// import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -21,6 +22,8 @@ import com.facebook.react.bridge.ReadableMap;
 public class RNStartActivityForResultModule extends ReactContextBaseJavaModule {
     private static final String ERROR = "ERROR";
     private static final String ACTIVITY_DOES_NOT_EXIST = "ACTIVITY_DOES_NOT_EXIST";
+    private static final int ACTIVITY_REQUEST_CODE = 1;
+    private String returnKey = "";
 
     private Promise mPromise;
 
@@ -46,7 +49,7 @@ public class RNStartActivityForResultModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startActivityForResult(String resultKey, String action, String data, ReadableMap extra, Promise promise) {
+    public void startActivityForResult(String key, ReadableMap options, Promise promise) {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity == null) {
@@ -57,17 +60,19 @@ public class RNStartActivityForResultModule extends ReactContextBaseJavaModule {
         mPromise = promise;
 
         try {
-            Intent intent = new Intent(action || Intent.ACTION_VIEW);
+            String intentAction = options.getString("action") == null ? Intent.ACTION_VIEW : options.getString("action");
+            Intent intent = new Intent(intentAction);
 
-            if (data) {
-                intent.setData(url);
+            if (options.getString("uri") != null) {
+                intent.setData(Uri.parse(options.getString("uri")));
             }
-            if (extra) {
-                intent.putExtras(Arguments.toBundle(extra));
+            if (options.getMap("extra") != null) {
+                intent.putExtras(Arguments.toBundle(options.getMap("extra")));
             }
 
-            currentActivity.startActivityForResult(intent, resultKey);
-            mPromise.put(resultKey, promise);
+            returnKey = key;
+
+            currentActivity.startActivityForResult(intent, ACTIVITY_REQUEST_CODE);
         } catch (Exception e) {
             mPromise.reject(ERROR, e);
             mPromise = null;
@@ -76,9 +81,9 @@ public class RNStartActivityForResultModule extends ReactContextBaseJavaModule {
 
     private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
         @Override
-        public void onActivityResult(Activity activity, String resultKey, int resultCode, Intent data) {
+        public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
             if (data != null) {
-                String returnValue = intent.getStringExtra(resultKey);
+                String returnValue = data.getStringExtra(returnKey);
                 mPromise.resolve(returnValue);
                 mPromise = null;
             }

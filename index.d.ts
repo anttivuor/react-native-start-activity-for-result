@@ -1,5 +1,9 @@
-declare namespace SendIntentAndroid {
-    const startActivityForResult: (requestCode: string, url: string, data) => void
-}
+type Options = {
+    action?: string,
+    uri?: string,
+    extra?: Object,
+};
 
-export = SendIntentAndroid
+declare type startActivityForResult = (key: string, options: Options) => void
+
+export = startActivityForResult

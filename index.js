@@ -1,14 +1,12 @@
 /**
- * @providesModule SendIntentAndroid
+ * @providesModule RNStartActivityForResult
  */
 
 var {NativeModules} = require("react-native");
-var RNSendIntentAndroid = NativeModules.SendIntentAndroid || {};
+var RNStartActivityForResult = NativeModules.RNStartActivityForResult || {};
 
-var SendIntentAndroid = {
-    startActivityForResult(requestCode, url, data) {
-        return RNSendIntentAndroid.startActivityForResult(requestCode, url, data);
-    },
+var startActivityForResult = (key, options) => {
+    return RNStartActivityForResult.startActivityForResult(key, options);
 };
 
- module.exports = SendIntentAndroid;
+module.exports = startActivityForResult;
