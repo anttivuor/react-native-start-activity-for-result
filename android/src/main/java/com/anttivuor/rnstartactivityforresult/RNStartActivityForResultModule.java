@@ -82,7 +82,7 @@ public class RNStartActivityForResultModule extends ReactContextBaseJavaModule {
     private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
         @Override
         public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-            if (data != null) {
+            if (mPromise != null && data != null) {
                 String returnValue = data.getStringExtra(returnKey);
                 mPromise.resolve(returnValue);
                 mPromise = null;
